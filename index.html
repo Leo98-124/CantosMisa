@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APP Cantos V1.0</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 5vw;
+      background-color: #f4f4f4;
+      color: #222;
+    }
+    h1, h2 {
+      color: #2e4a62;
+    }
+    button.seccion-btn {
+      background-color: #2e4a62;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      text-align: left;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+    .seccion-btn.activo {
+      background-color: #4e6a85;
+    }
+    .contenedor {
+      display: none;
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+    .canto {
+      background-color: #ffffff;
+      border-left: 4px solid #2e4a62;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .titulo {
+      font-weight: bold;
+      color: #222;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+      .letra {
+      white-space: pre-line;
+      line-height: 1.2;
+    }
+    .favorito-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #007acc;
+    }
+    .favorito-btn:disabled {
+      color: #2ecc71;
+      cursor: default;
+    }
+    .mensaje-agregado {
+      font-size: 0.85rem;
+      color: #2e7d32;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+    .detalles {
+      display: none;
+      margin-top: 10px;
+    }
+    .canto.expandido .detalles {
+      display: block;
+    }
+    #tema-btn {
+      background-color: #2e4a62;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #ordinarios .seccion-btn {
+      margin-left: 20px;
+    }
+    #ordinarios .contenedor {
+      margin-left: 20px;
+      background-color: #f9f9fc;
+      border-left: 3px solid #ccd6e0;
+      padding: 10px;
+      border-radius: 4px;
+    }
+
+    /* 🌒 Tema oscuro */
+    body.tema-oscuro {
+      background-color: #12181b;
+      color: #e0e6ed;
+    }
+    body.tema-oscuro .canto {
+      background-color: #1f2a30;
+      border-left-color: #4f9ec4;
+    }
+    body.tema-oscuro .titulo {
+      color: #ffce54;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    body.tema-oscuro .letra {
+      color: #cdd6df;
+    }
+    body.tema-oscuro .favorito-btn {
+      color: #4fc3f7;
+    }
+    body.tema-oscuro .favorito-btn:disabled {
+      color: #81c784;
+    }
+    body.tema-oscuro .seccion-btn {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+    }
+    body.tema-oscuro .seccion-btn.activo {
+      background-color: #3f5870;
+    }
+    body.tema-oscuro h1,
+    body.tema-oscuro h2 {
+      color: #ffd369;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    body.tema-oscuro #ordinarios .contenedor {
+      background-color: #1a232a;
+      border-left-color: #4f9ec4;
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 24px;
+      }
+      button.seccion-btn {
+        font-size: 16px;
+        padding: 8px 12px;
+      }
+      .canto {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>CANTOS PARROQUIA DE GUADALUPE V1.0</h1>
+
+  <!-- Botón de cambio de tema -->
+  <button onclick="alternarTema()" id="tema-btn">🌙 Modo Oscuro</button>
+
+  <!-- Buscador -->
+  <input
+    type="text"
+    id="buscador"
+    placeholder="Buscar por nombre, tipo o tema..."
+    aria-label="Buscar cantos por nombre, tipo o tema"
+    onkeyup="filtrarCantos()"
+  />
+
+  <!-- Sección: Esquema -->
+  <button class="seccion-btn" onclick="mostrarOcultar('esquema', this)">🗂️ Esquema de la Misa</button>
+  <div id="esquema" class="contenedor"></div>
+
+  <!-- Sección: Entrada -->
+  <button class="seccion-btn" onclick="mostrarOcultar('entrada', this)">Cantos de Entrada</button>
+  <div id="entrada" class="contenedor"></div>
+
+  <!-- Sección: Ofertorio -->
+  <button class="seccion-btn" onclick="mostrarOcultar('ofertorio', this)">Cantos de Ofertorio</button>
+  <div id="ofertorio" class="contenedor"></div>
+
+  <!-- Sección: Comunión -->
+  <button class="seccion-btn" onclick="mostrarOcultar('comunion', this)">Cantos de Comunión</button>
+  <div id="comunion" class="contenedor"></div>
+
+  <!-- Sección: Salida -->
+  <button class="seccion-btn" onclick="mostrarOcultar('salida', this)">Cantos de Salida</button>
+  <div id="salida" class="contenedor"></div>
+
+  <!-- Sección: Cantos Ordinarios -->
+  <button class="seccion-btn" onclick="mostrarOcultar('ordinarios', this)">Cantos Ordinarios</button>
+  <div id="ordinarios" class="contenedor">
+
+    <!-- Gloria -->
+    <button class="seccion-btn" onclick="mostrarOcultar('gloria', this)">Gloria</button>
+    <div id="gloria" class="contenedor"></div>
+
+    <!-- Santo -->
+    <button class="seccion-btn" onclick="mostrarOcultar('santo', this)">Santo</button>
+    <div id="santo" class="contenedor"></div>
+
+    <!-- Cordero -->
+    <button class="seccion-btn" onclick="mostrarOcultar('cordero', this)">Cordero</button>
+    <div id="cordero" class="contenedor"></div>
+  </div>
+
+
+
+  <!-- Script con cantos embebidos -->
+  <script>
+    const cantos = [
+      {
+        "titulo": "Caminare en presencia del señor",
+        "tema": "entrada",
+        "letra": 
+
+ `Caminaré en presencia del Señor,
+Caminaré en presencia del Señor
+
+Amo al Señor porque escucha mi voz suplicante,
+Porque inclina su oído hacia mí,
+El día que lo invoco...
+
+Caminaré en presencia del Señor,
+Caminaré en presencia del Señor...
+
+Me envolvía en redes de muerte,
+Caí en tristeza y en angustia,
+Invoqué el Nombre del Señor:
+¡Señor, salva mi vida!...
+
+Caminaré en presencia del Señor,
+Caminaré en presencia del Señor...
+
+El Señor es benigno y justo
+Nuestro Dios es compasivo
+El Señor guarda a los sencillos
+Estando yo sin fuerzas me salvó...
+
+Caminaré en presencia del Señor,
+Caminaré en presencia del Señor...
+
+Alma mía, recobra tu calma
+Que el Señor fue bueno contigo
+Arrancó mi alma de la muerte,
+Mis ojos de las lágrimas, mis pies de la caída...
+
+Caminaré en presencia del Señor,
+Caminaré en presencia del Señor `
+      },
+      {
+        "titulo": "Vino y Pan",
+        "tema": "ofertorio",
+        "letra": 
+`Vino y pan en oblación
+esperan el milagro del Señor.
+
+Ve nuestra ofrenda sobre tu santo altar:
+era en los campos dulce vid y trigal.
+
+Pero tú, por tu bondad
+transformas nuestra ofrenda en ti, Señor.
+
+Toma mi vida y también cambiará.
+Llena mi alma de tu gracia y tu paz.
+
+Amén.`
+      },
+      {
+        "titulo": "Symbolum 77",
+        "tema": "comunion",
+        "letra": 
+`Eres Tú mi vida, solo Tú, Señor
+Eres mi Camino, eres mi Verdad
+Seguiré tus pasos, me guiará tu amor
+Tú me has dado vida nueva y tu salvación
+Ya no tengo más temor si tú estás aquí
+Te lo ruego, quédate en mí.
+
+Creo en Jesucristo, hijo de María
+Hijo eterno y Santo, nuestro Redentor
+Creo que por salvarme moriste en la cruz
+Y al resucitar me diste vida en plenitud
+En el pan y el vino te nos das, Señor
+Llena mi alma, dame tu amor
+
+Eres tú mi fuerza, solo tú, Señor
+Eres mi camino y mi libertad
+Nada en este mundo nos separará
+Ya sé que tu mano fuerte no me dejará
+De todos los males tú me librarás
+Te lo pido, dame tu paz
+
+Eres pan de vida, fuente de amor
+Tú mi fortaleza, ¡eres mi Señor!
+Tú que sabes bien quien soy dame tu perdón
+En tus manos yo me entrego todo entero a ti
+Quédate en mi corazón, llena mi existir
+Te lo ruego, quédate en mí
+
+Eres Tú mi vida, solo Tú, Señor
+Eres mi Camino, eres mi Verdad
+Seguiré tus pasos, me guiará tu amor
+Tú me has dado vida nueva y tu salvación
+Ya no tengo más temor si tú estás aquí
+Te lo ruego, quédate en mí.`
+      },
+      {
+        "titulo": "Alma Misionera",
+        "tema": "salida",
+        "letra": 
+`Señor
+Toma mi vida nueva
+Antes de que la espera
+Desgaste años en mí
+
+Estoy
+Dispuesto a lo que quieras
+No importa lo que sea
+Tú llámame a servir
+
+Llévame donde los hombres
+Necesiten Tus palabras
+Necesiten Tus ganas de vivir
+Donde falte la esperanza
+Donde falte la alegría
+Simplemente
+Por no saber de ti
+
+Te doy
+Mi corazón sincero
+Para gritar sin miedo
+Lo hermoso que es Tu amor
+
+Señor
+Tengo alma misionera
+Condúceme a la tierra
+Que tenga sed de Dios
+
+Llévame donde los hombres
+Necesiten Tus palabras
+Necesiten Tus ganas de vivir
+Donde falte la esperanza
+Donde falte la alegría
+Simplemente
+Por no saber de ti
+
+Y así
+En marcha iré cantando
+Por pueblos predicando
+Tu grandeza, Señor
+
+Tendré
+Mis brazos sin cansancio
+Tu historia entre mis labios
+Y fuerza en la oración
+
+Llévame donde los hombres
+Necesiten Tus palabras
+Necesiten Tus ganas de vivir
+Donde falte la esperanza
+Donde falte la alegría
+Simplemente
+Por no saber de ti
+
+Llévame donde los hombres
+Necesiten Tus palabras
+Necesiten Tus ganas de vivir
+Donde falte la esperanza
+Donde falte la alegría
+Simplemente
+Por no saber de ti
+
+Simplemente
+Por no saber de ti`
+      },
+      {
+        "titulo": "Gloria - Misa Ritmica",
+        "tema": "gloria",
+        "letra": 
+`Gloria, gloria, a Dios en el cielo y en la tierra a los hombres paz. x2
+
+Te alabamos y te bendecimos, te adoramos y glorificamos,
+y nosotros hoy te damos gracias
+por tu grande y eterna gloria.
+
+Gloria, gloria a Dios en el cielo y en la tierra a los hombres paz.
+
+Señor Dios, nuestro 
+Padre, Padre, Padre.
+Señor Dios, Hijo
+Piedad, piedad, piedad Señor.
+Tú que quitas el pecado del mundo,
+Escúchanos, escúchanos
+Tú que estás a la derecha del Padre,
+Piedad, piedad, piedad Señor.
+
+Solo Tú eres Santo, solo Tú Señor,
+Solo Tú Altísimo, Jesucristo
+Con el Santo Espíritu en la gloria de Dios Padre.
+Amén, amén, amén.
+Amén, amén, amén.`
+      },
+      {
+        "titulo": "Santo, Santo, Santo",
+        "tema": "santo",
+        "letra": 
+`Santo, Santo, Santo 
+Es el Señor Dios del universo
+Él nos esta en el cielo 
+Y la tierra de tu gloria
+
+Hosanna, Hosanna, Hosanna en el cielo
+Hosanna, Hosanna, Hosanna en el cielo
+
+Bendito el que viene en el nombre del Señor
+
+Hosanna, Hosanna, Hosanna en el cielo
+Hosanna, Hosanna, Hosanna en el cielo`
+      },
+      {
+        "titulo": "Cordero de Dios",
+        "tema": "cordero",
+        "letra": `Cordero de Dios que quitas el pecado del mundo,
+ten piedad de nosotros... danos la paz.`
+      }
+    ];
+  
+  function cargarCantosDesdeVariable() {
+    const agrupados = {};
+    cantos.forEach(canto => {
+      const temaId = canto.tema.toLowerCase().replace(/\s/g, "");
+      if (!agrupados[temaId]) agrupados[temaId] = [];
+      agrupados[temaId].push(canto);
+    });
+
+    Object.entries(agrupados).forEach(([temaId, lista]) => {
+      const contenedor = document.getElementById(temaId);
+      if (!contenedor) {
+        console.warn(`No hay un contenedor con id="${temaId}"`);
+        return;
+      }
+
+      lista.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es', { sensitivity: 'base' }));
+
+      lista.forEach(canto => {
+        const div = document.createElement('div');
+        div.className = 'canto';
+        div.setAttribute('data-titulo', canto.titulo);
+        div.setAttribute('data-tema', canto.tema);
+        div.onclick = () => div.classList.toggle('expandido');
+
+        div.innerHTML = `
+          <button class="favorito-btn" onclick="agregarAlEsquema(event, this)">+</button>
+          <div class="titulo">${canto.titulo}</div>
+          <div class="detalles">
+            <div>Tema: ${canto.tema}</div>
+            <div class="letra"><strong>Letra:</strong><br>${canto.letra}</div>
+          </div>
+        `;
+
+        contenedor.appendChild(div);
+      });
+    });
+
+    restaurarEstadoFavoritos();
+  }
+
+  function mostrarOcultar(id, boton) {
+    const contenedor = document.getElementById(id);
+    const visible = contenedor.style.display === "block";
+    contenedor.style.display = visible ? "none" : "block";
+    boton.classList.toggle("activo", !visible);
+  }
+
+  function filtrarCantos() {
+    const entrada = document.getElementById("buscador").value.toLowerCase();
+    const secciones = document.querySelectorAll(".contenedor");
+
+    secciones.forEach(seccion => {
+      const cantos = seccion.querySelectorAll(".canto");
+      let coincidencia = false;
+
+      cantos.forEach(canto => {
+        const texto = canto.innerText.toLowerCase();
+        if (texto.includes(entrada)) {
+          canto.style.display = "";
+          coincidencia = true;
+        } else {
+          canto.style.display = "none";
+        }
+      });
+
+      seccion.style.display = coincidencia ? "block" : "none";
+      const btn = document.querySelector(`button[onclick*="${seccion.id}"]`);
+      if (btn) {
+        btn.style.display = coincidencia || entrada === "" ? "block" : "none";
+        btn.classList.toggle("activo", coincidencia);
+      }
+    });
+  }
+
+  function alternarTema() {
+    const body = document.body;
+    const btn = document.getElementById("tema-btn");
+    body.classList.toggle("tema-oscuro");
+    const oscuro = body.classList.contains("tema-oscuro");
+    btn.textContent = oscuro ? "☀️ Modo Claro" : "🌙 Modo Oscuro";
+    localStorage.setItem("temaOscuro", oscuro);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("temaOscuro") === "true") {
+      document.body.classList.add("tema-oscuro");
+      const btn = document.getElementById("tema-btn");
+      if (btn) btn.textContent = "☀️ Modo Claro";
+    }
+
+    cargarCantosDesdeVariable();
+    mostrarEsquema();
+    mostrarSeccionEsquemaSiExiste();
+  });
+
+  function agregarAlEsquema(event, boton) {
+    event.stopPropagation();
+    const canto = boton.closest('.canto');
+    const titulo = canto.getAttribute('data-titulo');
+    const tema = canto.getAttribute('data-tema');
+    const letra = canto.querySelector('.letra')?.textContent.trim() || "";
+
+    const nuevo = { titulo, tema, letra };
+    let esquema = JSON.parse(localStorage.getItem('esquema')) || [];
+
+    const yaExiste = esquema.some(c => c.titulo === titulo && c.tema === tema);
+    if (!yaExiste) {
+      esquema.push(nuevo);
+      localStorage.setItem('esquema', JSON.stringify(esquema));
+      mostrarEsquema();
+
+      boton.disabled = true;
+      boton.textContent = "✔️";
+
+      const mensaje = document.createElement('div');
+      mensaje.textContent = '✅ Agregado al esquema';
+      mensaje.className = 'mensaje-agregado';
+      boton.parentElement.appendChild(mensaje);
+
+      setTimeout(() => mensaje.remove(), 3000);
+      mostrarSeccionEsquemaSiExiste();
+    } else {
+      boton.disabled = true;
+      boton.textContent = "✔️";
+    }
+  }
+
+  function mostrarEsquema() {
+    const contenedor = document.getElementById('esquema');
+    contenedor.innerHTML = '';
+    const esquema = JSON.parse(localStorage.getItem('esquema')) || [];
+
+    esquema.forEach((canto, index) => {
+      const div = document.createElement('div');
+      div.classList.add('canto');
+      div.innerHTML = `
+        <button class="favorito-btn" onclick="eliminarDelEsquema(${index})">🗑️</button>
+        <div class="titulo">${canto.titulo}</div>
+        <div class="detalles">
+          <div>Tema: ${canto.tema}</div>
+          <div class="letra">${canto.letra}</div>
+        </div>
+      `;
+      div.onclick = () => div.classList.toggle('expandido');
+      contenedor.appendChild(div);
+    });
+  }
+
+  function eliminarDelEsquema(indice) {
+    let esquema = JSON.parse(localStorage.getItem('esquema')) || [];
+    const eliminado = esquema[indice];
+    esquema.splice(indice, 1);
+    localStorage.setItem('esquema', JSON.stringify(esquema));
+    mostrarEsquema();
+
+    const todos = document.querySelectorAll('.canto');
+    todos.forEach(canto => {
+      const titulo = canto.getAttribute('data-titulo');
+      const tema = canto.getAttribute('data-tema');
+      if (titulo === eliminado.titulo && tema === eliminado.tema) {
+        const boton = canto.querySelector('.favorito-btn');
+        if (boton) {
+          boton.disabled = false;
+          boton.textContent = "+";
+        }
+      }
+    });
+  }
+
+  function restaurarEstadoFavoritos() {
+    const esquema = JSON.parse(localStorage.getItem('esquema')) || [];
+    const cantos = document.querySelectorAll('.canto');
+    cantos.forEach(canto => {
+      const titulo = canto.getAttribute('data-titulo');
+      const tema = canto.getAttribute('data-tema');
+      const boton = canto.querySelector('.favorito-btn');
+      if (boton && esquema.some(c => c.titulo === titulo && c.tema === tema)) {
+        boton.disabled = true;
+        boton.textContent = "✔️";
+      }
+    });
+  }
+
+  function mostrarSeccionEsquemaSiExiste() {
+    const esquema = JSON.parse(localStorage.getItem('esquema')) || [];
+    if (esquema.length > 0) {
+      const contenedor = document.getElementById('esquema');
+      const boton = document.querySelector('button[onclick*="esquema"]');
+      if (contenedor && boton) {
+        contenedor.style.display = "block";
+        boton.classList.add("activo");
+      }
+    }
+  }
+</script>
+</body>
+</html>
+
